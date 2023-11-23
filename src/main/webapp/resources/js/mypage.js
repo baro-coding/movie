@@ -1,34 +1,22 @@
-function my_review_list() {
-    let my_review = `<div class="review_list_box">
-                        <div class="list_line"></div>
-                        <div class="review_title_box">
-                            <div class="review_movie_name">
-                                영화제목</div>
-                            <div class="write_date">날짜</div>
-                        </div>
-                        <textarea rows="1" class="review_content" readonly onchange="handleResizeHeight()">리뷰내용</textarea>
-                        <div class="star_icon1"><img src="./img/star.png" alt=""></div>
-                        <div class="movie_avg1">4</div>
-                        <div class="like_box">
-                            <div class="like_icon"><img src="./img/heart_cnt.png" alt=""></div>
-                            <div class="like_cnt">256</div>
-                        </div>
-                        <div class="update_box">
-                            <div class="update_btn review_update">수정</div>
-                            <div class="update_btn" onclick="content_delete()">삭제</div>
-                        </div>
-                    </div>`
-
-    $(my_review).appendTo(".my_review_list");
+function genreClick(id) {
+    location.href = "./list/chart?title=genr&val=" + id
 }
-my_review_list();
+function changeOrder(obj) {
+    // 최신순, 좋아요순이 바뀌면 아래 url을 호출한다.
+    location.href = "./myPage?orderType=" + obj.value
+}
+function moveList(type, count) {
+    // count가 0이면 이동하지 않는다.
+    if (count == 0) {
+        return;
+    }
+
+    location.href =  "./list/chart?title=" + type;
+}
 
 $('.btn_myreview a').click(function() {
-
     event.preventDefault();
-
     let href = $(this).attr('href')
-
     $('html, body').animate({
         scrollTop: $(href).offset().top
     }, 1000)    
@@ -52,13 +40,8 @@ function updateCheck() {
         }
     })()
 
-    // 비밀번호 확인하고 회원정보 폼 뜨기 
-    
-    
-    
+    // 비밀번호 확인하고 회원정보 폼 뜨기
 }
-
-
 
 function closePopup() {
   var popup = document.getElementById("popup");
@@ -74,7 +57,6 @@ $(document).mouseup(function (e){
   }
 });
 
-
 function updatePopup() {
   Swal.fire({
     position: "center",
@@ -85,8 +67,6 @@ function updatePopup() {
     timer: 1500
   });
 }
-
-
 
 function unregister() {
   Swal.fire({
@@ -215,76 +195,85 @@ birth_month.addEventListener('change', function() {
 })
 
 // 차트 
-const ctx = document.getElementById('myChart');
-        
-new Chart(ctx, {
-    type: 'bar',
-    data: {
-    labels: ['1', '2', '3', '4', '5'],
-    datasets: [{
-        data: [12, 19, 3, 5, 2],
-        backgroundColor: [
-            'rgba(255, 99, 132, 0.5)',
-            'rgba(54, 162, 235, 0.5)',
-            'rgba(255, 206, 86, 0.5)',
-            'rgba(75, 192, 192, 0.5)',
-            'rgba(153, 102, 255, 0.5)'
-        ],
-        borderWidth: 2,
-        borderColor: [
-            'rgba(255, 99, 132, 1)',
-            'rgba(54, 162, 235, 1)',
-            'rgba(255, 206, 86, 1)',
-            'rgba(75, 192, 192, 1)',
-            'rgba(153, 102, 255, 1)'
-        ],
-        fill: false
-    }]
-    },
-    options: {
-    maxBarThickness: 50,
-    scales: { // 눈금선 없애기
-        x: {
-            grid: {
-                display: false
-            },
-            ticks: {
-                color: "rgba(255, 255, 255, 1)", // 글자 색
-                font: {
-                    size: 20
-                }
-            },
-            border: {
-                color: "rgba(255, 255, 255, 1)" // 축 색
-            },
-            barPercentage: 1,
-            categoryPercentage: 1,
-            barThickness : 45
+
+function chartInit(data) {
+    const ctx = document.getElementById('myChart');
+    const chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['1', '2', '3', '4', '5'],
+            datasets: [{
+                data: data,
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.5)',
+                    'rgba(54, 162, 235, 0.5)',
+                    'rgba(255, 206, 86, 0.5)',
+                    'rgba(75, 192, 192, 0.5)',
+                    'rgba(153, 102, 255, 0.5)'
+                ],
+                borderWidth: 2,
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)'
+                ],
+                fill: false
+            }]
         },
-        y: {
-            grid: {
-                display: false
+        options: {
+            onClick: (e) => {
+                // label값을 가져와서 링크이동시켜준다.
+                const canvasPosition = Chart.helpers.getRelativePosition(e, chart);
+                const dataX = chart.scales.x.getValueForPixel(canvasPosition.x);
+                location.href = "./list/chart?title=myScore&val=" + (dataX + 1)
             },
-            ticks: {
-                color: "rgba(255, 255, 255, 1)",
-                font: {
-                    size: 0
+            maxBarThickness: 50,
+            scales: { // 눈금선 없애기
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        color: "rgba(255, 255, 255, 1)", // 글자 색
+                        font: {
+                            size: 20
+                        }
+                    },
+                    border: {
+                        color: "rgba(255, 255, 255, 1)" // 축 색
+                    },
+                    barPercentage: 1,
+                    categoryPercentage: 1,
+                    barThickness : 45
+                },
+                y: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        color: "rgba(255, 255, 255, 1)",
+                        font: {
+                            size: 0
+                        }
+                    },
+                    border: {
+                        display: false
+                    }
+                },
+            },
+
+            scaleShowLabels : false,
+            plugins: {
+                legend: {
+                    display: false,
                 }
-            },
-            border: {
-                display: false
             }
-        },
-    },
-    
-    scaleShowLabels : false,
-    plugins: {
-        legend: {
-        display: false,
         }
-    }
-    }
-});
+    });
+}
+
 
 let updateButtons = document.querySelectorAll('.review_update');
 updateButtons.forEach(function(button) {

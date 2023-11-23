@@ -13,7 +13,7 @@ import com.movielike.app.domain.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.http.HttpSession;
+import java.util.HashMap;
 import java.util.List;
 
 @Service
@@ -33,11 +33,23 @@ public class MyPageService {
     @Autowired
     SessionService sessionService;
 
-    public List<ReviewDto> reviewFind() {
-        ReviewDto reviewDto = new ReviewDto();
-        reviewDto.setUserId(sessionService.getLoginId());
+    public List<ReviewDto> reviewFind(int page, int pageSize, String orderType) {
+        // 페이지 처리를 위한 계산
+        int startRow = (page - 1) * pageSize;
 
-        return myPageDao.selectReview(reviewDto);
+        HashMap params = new HashMap();
+        params.put("userId", sessionService.getLoginId());
+        params.put("startRow", startRow);
+        params.put("pageSize", pageSize);
+        params.put("orderType", orderType);
+
+        return myPageDao.selectReview(params);
+    }
+
+    public int reviewCount() {
+        HashMap params = new HashMap();
+        params.put("userId", sessionService.getLoginId());
+        return myPageDao.selectReviewCount(params);
     }
 
     public List<WatchedMovieDto> watchedMovieFind() {

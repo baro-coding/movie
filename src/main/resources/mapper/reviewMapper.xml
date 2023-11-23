@@ -5,14 +5,38 @@
 
 <mapper namespace="com.movielike.app.dao.reviewMapper">
 <!-- 키워드 찾기 무비 리스트 출력 -->
-    <select id="selectReview" resultType="reviewDto" parameterType="reviewDto">
-        select r.*
-              ,u.userNickname
-          from review r
-          join user u
-            on r.userId = u.userId
-         WHERE r.userId = #{userId}
-        ORDER BY rvRegDate DESC
+    <select id="selectReview" resultType="reviewDto" parameterType="map">
+        select
+            r.rvId,
+            r.userId,
+            r.movId,
+            r.rvScore,
+            r.rvContent,
+            DATE_FORMAT(r.rvRegDate, '%Y-%m-%d %H:%i') rvRegDate,
+            r.rvLike,
+            u.userNickname,
+            m.movName
+        from review r
+        join user u
+        on r.userId = u.userId
+        left join movie m on r.movId =m.movId
+        WHERE r.userId = #{userId}
+        <if test="orderType == 'new'">
+            ORDER BY rvRegDate DESC
+        </if>
+        <if test="orderType == 'like'">
+            ORDER BY rvLike DESC
+        </if>
+        <if test="startRow != null and pageSize != null">
+            LIMIT #{startRow}, #{pageSize}
+        </if>
+    </select>
+
+    <select id="selectReviewCount" resultType="Integer" parameterType="map">
+        select
+        count(*)
+        from review r
+        WHERE r.userId = #{userId}
     </select>
 
     <select id="selectReviewGroupByScore" resultType="reviewScoreDto" parameterType="reviewDto">
