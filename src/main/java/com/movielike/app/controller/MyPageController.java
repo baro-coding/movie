@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpSession;
 import java.util.List;
@@ -16,7 +17,11 @@ public class MyPageController {
     MyPageService myPageService;
 
     @GetMapping("/myPage")
-    public String mypage(Model model, HttpSession session) {
+    public String mypage(
+            @RequestParam(required = false, defaultValue = "1") int page,
+            @RequestParam(required = false, defaultValue = "10") int pageSize,
+            @RequestParam(required = false, defaultValue = "new") String orderType,
+            Model model, HttpSession session) {
         // 원래의 과정은
         // 로그인 후에 session에 loginId를 넣어줘야함..
         // 그런데 지금은 그 과정이 없으므로 여기서 세션값에 주입을 해줌..
@@ -27,9 +32,13 @@ public class MyPageController {
         session.setAttribute("loginId", 1);
         session.setAttribute("loginNick","hello@hanmail.com");
 
-        List<ReviewDto> reviews = myPageService.reviewFind();
+        List<ReviewDto> reviews = myPageService.reviewFind(page, pageSize, orderType);
+        int totalItems = myPageService.reviewCount();
         model.addAttribute("reviews_count", reviews.size());
         model.addAttribute("review_list", reviews);
+
+        int totalPages = (int) Math.ceil((double) totalItems / pageSize);
+
 
         List<WatchedMovieDto> watchedMovies = myPageService.watchedMovieFind();
         model.addAttribute("watched_count", watchedMovies.size());
@@ -45,12 +54,13 @@ public class MyPageController {
         List<GenreDto> genreList = myPageService.genreFind();
         model.addAttribute("genre_list", genreList);
 
+        // 페이징 정보를 전달
+        model.addAttribute("currentPage", page);
+        model.addAttribute("startPage", page - (page - 1) % 10);
+        model.addAttribute("pageSize", pageSize);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("orderType", orderType);
+
         return "Movie_Like_mypage";
-    }
-
-    @Controller
-    public  class chart
-    {
-
     }
 }
